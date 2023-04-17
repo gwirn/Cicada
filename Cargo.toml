@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.24"
+regex = "1"
+notify-rust = "4"

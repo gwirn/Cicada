@@ -1,73 +1,131 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
 use chrono::Datelike;
 use chrono::{Local, NaiveDate};
-use std::collections::HashMap;
-fn main() -> std::io::Result<()> {
-    let event_dates: Vec<u8> = vec![8, 12];
+use regex::Regex;
+use std::io;
+mod date_utils;
+mod view_dates;
+mod view_month;
+use crate::date_utils::{
+    append_file, argsort, check_dates, offset_and_time, read_file, saved_data_header,
+    time_date_lef, SavedDate,
+};
+use crate::view_dates::{get_next_n, grep_by_date, grep_by_description, last_added};
+use crate::view_month::{appointment_check, month_len, month_view};
+
+fn main() -> io::Result<()> {
     let now = Local::now().date_naive();
-    let cur_day = now.day() as u8;
-    let cur_month = now.month() as u8;
+    let cur_day: u32 = now.day();
+    let cur_month: u32 = now.month();
+    let cur_year: i32 = now.year();
 
-    let first_day_month = NaiveDate::from_ymd_opt(now.year(), now.month(), 1)
-        .expect("First day of the month couldn't be calculated")
-        .weekday()
-        .number_from_monday() as u8;
+    let file_content = read_file("./src/dates/date.file");
 
-    let month_hash = month_hashmap();
-    match month_hash.get(&cur_month) {
-        Some(&month) => month_view(&month, &cur_day, &event_dates, &first_day_month),
-        _ => println!("Couldn't retrieve current month"),
-    }
-    Ok(())
-}
-
-fn month_hashmap() -> HashMap<u8, u8> {
-    // could be better done to test for feb 29
-    let mut month_lenght = HashMap::new();
-    month_lenght.insert(1u8, 32);
-    month_lenght.insert(2u8, 29);
-    month_lenght.insert(3u8, 32);
-    month_lenght.insert(4u8, 31);
-    month_lenght.insert(5u8, 32);
-    month_lenght.insert(6u8, 31);
-    month_lenght.insert(7u8, 32);
-    month_lenght.insert(8u8, 32);
-    month_lenght.insert(9u8, 31);
-    month_lenght.insert(10u8, 32);
-    month_lenght.insert(11u8, 31);
-    month_lenght.insert(12u8, 32);
-    month_lenght
-}
-
-fn month_view(month: &u8, cur_day: &u8, event: &Vec<u8>, fdm: &u8) {
-    println!("\x1b[4;1m Mo  Tu  We  Th  Fr  Sa  Su\x1b[0m");
-    let skip: u8 = fdm - 2;
-
-    for i in 0..(month + skip) {
-        if i > skip {
-            let mut add = "";
-            if (i + 1) % 7 == 0 && i > 0 {
-                add = "\n";
-            }
-            let i_skip = &i - skip;
-            let mut color_num = "0";
-            if i_skip == *cur_day {
-                color_num = "32;1";
-            }
-            let mut event_sign = " ";
-            if event.contains(&i_skip) {
-                event_sign = "\x1b[91m∆\x1b[0m";
-            }
-
-            print!(
-                "\x1b[{0}m{1:>3}\x1b[0m{2}{3}",
-                color_num,
-                i - skip,
-                event_sign,
-                add,
-            );
-        } else {
-            print!("    ")
+    let args: Vec<String> = std::env::args().collect();
+    match args.len() {
+        1 => {
+            let first_day_month = NaiveDate::from_ymd_opt(cur_year, cur_month as u32, 1)
+                .expect("First day of the month couldn't be calculated")
+                .weekday()
+                .number_from_monday();
+            let event_dates: Vec<u32> = appointment_check(&file_content, &cur_month, &cur_year);
+            let month_hash = month_len(&cur_year, &cur_month);
+            month_view(&month_hash, &cur_day, &event_dates, &first_day_month);
         }
+        2 => match &args[1][..] {
+            "check" => {
+                check_dates(&file_content);
+                println!("Checked for upcomming dates")
+            }
+            _ => eprintln!("Invalid command '{}'", &args[1]),
+        },
+        3 => {
+            let cmd = &args[1];
+            let argument = &args[2];
+            match &cmd[..] {
+                "-h" | "--help" => {
+                    println!("Print all commands")
+                }
+                "-n" | "--next" => {
+                    get_next_n(
+                        argument
+                            .parse::<usize>()
+                            .expect("Couldn't convert argument to usize"),
+                        &file_content,
+                        "forward",
+                    );
+                    println!("Print next n dates")
+                }
+                "-p" | "--prev" => {
+                    get_next_n(
+                        argument
+                            .parse::<usize>()
+                            .expect("Couldn't convert argument to usize"),
+                        &file_content,
+                        "reverse",
+                    );
+                    println!("Print previous n dates")
+                }
+                "-gda" | "--grepdate" => {
+                    grep_by_date(argument, &file_content);
+                    println!("Search for all dates wit specific date pattern")
+                }
+                "-gde" | "--grepdes" => {
+                    grep_by_description(argument, &file_content);
+                    println!("Search for date with specific regex pattern in description")
+                }
+                "-l" | "--last_add" => {
+                    last_added(
+                        argument
+                            .parse::<usize>()
+                            .expect("Couldn't convert argument to usize"),
+                        &file_content,
+                    );
+                    println!("Print n last added dates")
+                }
+                "-a" | "--add_date" => {
+                    println!("Add new date to file");
+                    let re = Regex::new(
+                        r"[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{2}:[0-9]{2},[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+),[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+),",
+                    )
+                    .expect("Invalid regex pattern");
+                    if re.is_match(argument) {
+                        append_file("./src/dates/date.file", argument);
+                    } else {
+                        eprintln!("Invalid argument '{}' has to have the following pattern '02-02-2022-02:00,2.0,1.5,description of appointment'", argument);
+                    }
+                }
+
+                _ => eprintln!("Invalid command '{} {}'", cmd, argument),
+            }
+        }
+        4 => {
+            let cmd = &args[1];
+            match &cmd[..] {
+                "-m" | "--month" => {
+                    let argument1 = &args[2]
+                        .parse::<u32>()
+                        .expect("Couldn't convert 1st argument to u32");
+                    let argument2 = &args[3]
+                        .parse::<i32>()
+                        .expect("Couldn't convert 2nd argument to u32");
+                    let first_day_month = NaiveDate::from_ymd_opt(*argument2, *argument1, 1)
+                        .expect("First day of the month couldn't be calculated")
+                        .weekday()
+                        .number_from_monday();
+                    let event_dates: Vec<u32> =
+                        appointment_check(&file_content, &*argument1, &*argument2);
+                    let month_hash = month_len(&*argument2, &*argument1);
+                    month_view(&month_hash, &0, &event_dates, &first_day_month);
+                    println!("Print the calender of the specific month")
+                }
+                _ => eprintln!("Invalid command '{} {} {}'", cmd, &args[2], &args[3]),
+            }
+        }
+        _ => eprintln!("Invalid command '{} {} {}'", &args[1], &args[2], &args[3]),
     }
-    println!("");
+
+    Ok(())
 }
