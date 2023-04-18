@@ -25,6 +25,14 @@ fn main() -> io::Result<()> {
     let cur_month: u32 = now.month();
     let cur_year: i32 = now.year();
 
+    match fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&DATE_FILE_PATH)
+    {
+        Ok(_) => println!("Created date.file at '{}'", &DATE_FILE_PATH),
+        Err(_) => {}
+    }
     let file_content = read_file(&DATE_FILE_PATH);
 
     let args: Vec<String> = std::env::args().collect();
