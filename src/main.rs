@@ -4,16 +4,20 @@
 use chrono::Datelike;
 use chrono::{Local, NaiveDate};
 use regex::Regex;
+use std::fs;
 use std::io;
+use std::io::prelude::*;
 mod date_utils;
 mod view_dates;
 mod view_month;
 use crate::date_utils::{
-    append_file, argsort, check_dates, offset_and_time, read_file, saved_data_header,
+    append_file, argsort, check_dates, offset_and_time, read_file, remove_entry, saved_data_header,
     time_date_lef, SavedDate,
 };
 use crate::view_dates::{get_next_n, grep_by_date, grep_by_description, last_added};
 use crate::view_month::{appointment_check, month_len, month_view};
+
+const DATE_FILE_PATH: &str = "./src/dates/date.file";
 
 fn main() -> io::Result<()> {
     let now = Local::now().date_naive();
@@ -21,7 +25,7 @@ fn main() -> io::Result<()> {
     let cur_month: u32 = now.month();
     let cur_year: i32 = now.year();
 
-    let file_content = read_file("./src/dates/date.file");
+    let file_content = read_file(&DATE_FILE_PATH);
 
     let args: Vec<String> = std::env::args().collect();
     match args.len() {
@@ -85,6 +89,9 @@ fn main() -> io::Result<()> {
                     );
                     println!("Print n last added dates")
                 }
+                "-d" | "--delete" => {
+                    remove_entry(argument, &DATE_FILE_PATH);
+                }
                 "-a" | "--add_date" => {
                     println!("Add new date to file");
                     let re = Regex::new(
@@ -92,7 +99,7 @@ fn main() -> io::Result<()> {
                     )
                     .expect("Invalid regex pattern");
                     if re.is_match(argument) {
-                        append_file("./src/dates/date.file", argument);
+                        append_file(&DATE_FILE_PATH, argument);
                     } else {
                         eprintln!("Invalid argument '{}' has to have the following pattern '02-02-2022-02:00,2.0,1.5,description of appointment'", argument);
                     }
@@ -126,6 +133,5 @@ fn main() -> io::Result<()> {
         }
         _ => eprintln!("Invalid command '{} {} {}'", &args[1], &args[2], &args[3]),
     }
-
     Ok(())
 }

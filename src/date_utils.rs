@@ -51,6 +51,7 @@ pub fn check_dates(data_vect: &Vec<SavedDate>) {
             Notification::new()
                 .summary("Calendar")
                 .body(&msg_string)
+                .icon("Calendar")
                 .timeout(0)
                 .show()
                 .expect("Couldn't display notification");
@@ -89,7 +90,7 @@ pub fn read_file(filepath: &str) -> Vec<SavedDate> {
     for line in
         std::io::BufReader::new(fs::File::open(filepath).expect("Failed to open date.file")).lines()
     {
-        let words = line.unwrap();
+        let words = line.expect("Couldn't read line");
         let words_split: Vec<&str> = words.split(",").collect();
         date_vec.push(SavedDate {
             id: words_split[0]
@@ -106,4 +107,25 @@ pub fn read_file(filepath: &str) -> Vec<SavedDate> {
         });
     }
     date_vec
+}
+pub fn remove_entry(rm_id: &str, file_path: &str) {
+    let temp_path = format!("{}.temp", file_path);
+    {
+        let temp_file = fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(&temp_path)
+            .expect("Couldn't create and open temp file");
+        let mut writer = std::io::BufWriter::new(&temp_file);
+        for line in
+            std::io::BufReader::new(fs::File::open(file_path).expect("Couldn't open date.file"))
+                .lines()
+        {
+            let line = line.as_ref().expect("Couldn't read line");
+            if !line.contains(rm_id) {
+                writeln!(writer, "{}", line).expect("Couldn't write to file");
+            }
+        }
+    }
+    fs::rename(temp_path, file_path).expect("Couldn't move .temp file to original file")
 }
