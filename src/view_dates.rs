@@ -3,7 +3,8 @@ use regex::Regex;
 pub fn last_added(n: usize, data_vect: &Vec<SavedDate>) {
     // get the last added dates
     let id_dates: Vec<i64> = data_vect.iter().map(|x| x.id).collect::<Vec<i64>>();
-    let id_order = argsort(&id_dates);
+    let mut id_order = argsort(&id_dates);
+    id_order.reverse();
     saved_data_header();
     let mut counter = 0;
     for i in id_order {
