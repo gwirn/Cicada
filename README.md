@@ -1,10 +1,11 @@
-# Cicada
+# Cicada  🦗
 ***C***ommand l***I***ne ***CA***len***DA***r
 
 Simple and lightweight command line calendar 
 
 ## Installation
 [Install rust and cargo](https://www.rust-lang.org/tools/install)
+Change the [directory path](https://github.com/gwirn/Cicada/blob/f799b56a5ea189c84c86e71a3e53ca4b7ab51e0b/src/main.rs#L20) to an absolute path so calender can be run from everywhere.
 
 Run `cargo build --release` to create a binary of the program.
 
