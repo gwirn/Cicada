@@ -38,15 +38,23 @@ fn month_name(month: &u32) -> String {
     }
 }
 
-pub fn month_view(month: &u32, cur_day: &u32, event: &Vec<u32>, fdm: &u32) {
+pub fn month_view(
+    year: &i32,
+    month: &u32,
+    month_len: &u32,
+    cur_day: &u32,
+    event: &Vec<u32>,
+    fdm: &u32,
+) {
+    println!("{:>15} {}", month_name(&month), &year);
     println!("\x1b[4;1m Mo  Tu  We  Th  Fr  Sa  Su\x1b[0m");
-    let skip: u32 = fdm - 2;
-    let month = month + 1;
+    let skip: u32 = *fdm - 1;
+    let month_len = month_len + 1;
 
-    for i in 0..(month + skip) {
+    for i in 1..(month_len + skip) {
         if i > skip {
             let mut add = "";
-            if (i + 1) % 7 == 0 && i > 0 {
+            if i % 7 == 0 && i > 0 {
                 add = "\n";
             }
             let i_skip = &i - skip;
@@ -61,13 +69,10 @@ pub fn month_view(month: &u32, cur_day: &u32, event: &Vec<u32>, fdm: &u32) {
 
             print!(
                 "\x1b[{0}m{1:>3}\x1b[0m{2}{3}",
-                color_num,
-                i - skip,
-                event_sign,
-                add,
+                color_num, &i_skip, event_sign, add,
             );
         } else {
-            print!("    ")
+            print!("    ");
         }
     }
     println!("");

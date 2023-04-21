@@ -10,7 +10,7 @@ Change the [directory path](https://github.com/gwirn/Cicada/blob/f799b56a5ea189c
 Run `cargo build --release` to create a binary of the program.
 
 ## Options and functionality
-The default view of the calendar is just the current month.
+The default mode of the calendar is just the current month.
 The current day is highlighted in bold green.
 A red ∆ on the right side of the day indicates an appointment.
 
