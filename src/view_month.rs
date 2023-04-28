@@ -88,13 +88,13 @@ pub fn appointment_check(data_vect: &Vec<SavedDate>, month: &u32, year: &i32) ->
             == *month
             && i_split[2]
                 .parse::<i32>()
-                .expect("Couldn't convert month from date.file to u8")
+                .expect("Couldn't convert month from date.file to i32")
                 == *year
         {
             appointments.push(
                 i_split[0]
                     .parse::<u32>()
-                    .expect("Couldn't convert day from date.file to u8"),
+                    .expect("Couldn't convert day from date.file to u32"),
             )
         }
     }
