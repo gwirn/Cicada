@@ -1,7 +1,7 @@
 # Cicada  🦗
 ***C***ommand l***I***ne ***CA***len***DA***r
 
-Simple and lightweight command line calendar 
+Simple command line calendar 
 
 ## Installation
 [Install rust and cargo](https://www.rust-lang.org/tools/install)

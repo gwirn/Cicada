@@ -1,8 +1,12 @@
+use crate::encrypt::{gen_key_pwd, read_bin, write_bin};
+use crate::{PASSWORD, SALT_LOC};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use notify_rust::Notification;
+use orion::{aead, kdf};
 use std::fmt;
 use std::fs;
 use std::io::prelude::*;
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct SavedDate {
@@ -39,6 +43,7 @@ pub fn time_date_lef(in_line: &str) -> i64 {
     let time_passed = time_fmt.signed_duration_since(cur_time).num_minutes() - &local_off_minutes;
     time_passed
 }
+
 pub fn check_dates(data_vect: &Vec<SavedDate>) {
     // check if a date alert has to be shown
     for i in data_vect {
@@ -58,6 +63,7 @@ pub fn check_dates(data_vect: &Vec<SavedDate>) {
         }
     }
 }
+
 pub fn argsort<T: Ord>(to_sort: &[T]) -> Vec<usize> {
     // get the indices that would sort a vector
     let mut inds = (0..to_sort.len()).collect::<Vec<_>>();
@@ -72,60 +78,98 @@ pub fn saved_data_header() {
         "Id", "Due", "Duration [h]", "AlertBefor [h]", "Description"
     )
 }
+
 pub fn append_file(filepath: &str, line: &str) {
+    let mut dec_data = if !Path::new(&filepath)
+        .try_exists()
+        .expect("Couldn't check date.file for existance")
+        || !Path::new(&SALT_LOC)
+            .try_exists()
+            .expect("Couldn't check .salt for existance")
+    {
+        let dec_d: Vec<u8> = Vec::new();
+        dec_d
+    } else {
+        let (_, key) = gen_key_pwd(
+            &PASSWORD,
+            orion::kdf::Salt::from_slice(read_bin(&SALT_LOC).as_ref())
+                .expect("Couldn't retrieve salt from file"),
+        );
+        let dec_d = aead::open(&key, &read_bin(&filepath)).expect("Couldn't decipher the file");
+        dec_d
+    };
     // time stamp of creation == id
     let entry_ts: i64 = Local::now().timestamp() - 1681429910;
     let entry_id = entry_ts.to_string();
-    let mut out = fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(filepath)
-        .expect("Couldn't open file to write to");
-    let file_line = format!("{},{}", &entry_id, line);
-    writeln!(out, "{}", file_line).expect("Couldn't write to file");
+    let file_line = format!("{},{}-X-", &entry_id, line);
+
+    for i in file_line.as_bytes() {
+        dec_data.push(*i);
+    }
+    let (salt, key) = gen_key_pwd(&PASSWORD, orion::kdf::Salt::default());
+    write_bin(&salt.as_ref().to_vec(), &SALT_LOC);
+    let cipher_text = aead::seal(&key, &dec_data).expect("Couldn't encrypt the data");
+    write_bin(&cipher_text, &filepath);
 }
+
 pub fn read_file(filepath: &str) -> Vec<SavedDate> {
     // read date.file content into vector of type SavedDate
     let mut date_vec: Vec<SavedDate> = Vec::new();
-    for line in
-        std::io::BufReader::new(fs::File::open(filepath).expect("Failed to open date.file")).lines()
+    if std::path::Path::new(&filepath)
+        .try_exists()
+        .expect("Couldn't check if date.file exists")
+        && Path::new(&SALT_LOC)
+            .try_exists()
+            .expect("Couldn't check salt file for existance")
     {
-        let words = line.expect("Couldn't read line");
-        let words_split: Vec<&str> = words.split(",").collect();
-        date_vec.push(SavedDate {
-            id: words_split[0]
-                .parse::<i64>()
-                .expect("Couldn't convert id to int"),
-            due: String::from(words_split[1]),
-            length: words_split[2]
-                .parse::<f32>()
-                .expect("Couldn't convert length to f32"),
-            alert_time_h: words_split[3]
-                .parse::<f32>()
-                .expect("Couldn't convert alert time to f32"),
-            description: String::from(words_split[4]),
-        });
-    }
-    date_vec
-}
-pub fn remove_entry(rm_id: &str, file_path: &str) {
-    let temp_path = format!("{}.temp", file_path);
-    {
-        let temp_file = fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(&temp_path)
-            .expect("Couldn't create and open temp file");
-        let mut writer = std::io::BufWriter::new(&temp_file);
-        for line in
-            std::io::BufReader::new(fs::File::open(file_path).expect("Couldn't open date.file"))
-                .lines()
+        let (_, key) = gen_key_pwd(
+            &PASSWORD,
+            orion::kdf::Salt::from_slice(read_bin(&SALT_LOC).as_ref())
+                .expect("Couldn't retrieve salt from file"),
+        );
+        let dec_data = aead::open(&key, &read_bin(&filepath)).expect("Couldn't decipher the file");
+        for line in std::str::from_utf8(&dec_data)
+            .expect("Failed to convert decoded file to str")
+            .split("-X-")
+            .collect::<Vec<_>>()
         {
-            let line = line.as_ref().expect("Couldn't read line");
-            if !line.contains(rm_id) {
-                writeln!(writer, "{}", line).expect("Couldn't write to file");
+            if &line.len() > &0 {
+                let words_split: Vec<&str> = line.split(",").collect();
+                date_vec.push(SavedDate {
+                    id: words_split[0]
+                        .parse::<i64>()
+                        .expect("Couldn't convert id to int"),
+                    due: String::from(words_split[1]),
+                    length: words_split[2]
+                        .parse::<f32>()
+                        .expect("Couldn't convert length to f32"),
+                    alert_time_h: words_split[3]
+                        .parse::<f32>()
+                        .expect("Couldn't convert alert time to f32"),
+                    description: String::from(words_split[4]),
+                });
             }
         }
     }
-    fs::rename(temp_path, file_path).expect("Couldn't move .temp file to original file")
+    date_vec
+}
+
+pub fn remove_entry(rm_id: &str, file_path: &str) {
+    let file_content = read_file(file_path);
+    let mut removed = Vec::new();
+    for (ci, i) in file_content.iter().enumerate() {
+        if i.id.to_string() != rm_id {
+            let acc_line = format!(
+                "{},{},{},{},{}-X-",
+                i.id, i.due, i.length, i.alert_time_h, i.description
+            );
+            for k in acc_line.as_bytes() {
+                removed.push(k.to_owned());
+            }
+        }
+    }
+    let (salt, key) = gen_key_pwd(&PASSWORD, orion::kdf::Salt::default());
+    write_bin(&salt.as_ref().to_vec(), &SALT_LOC);
+    let cipher_text = aead::seal(&key, &removed).expect("Couldn't encrypt the data");
+    write_bin(&cipher_text, &file_path);
 }

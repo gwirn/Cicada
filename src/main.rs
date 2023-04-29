@@ -9,6 +9,7 @@ use std::io;
 use std::io::prelude::*;
 mod argparse;
 mod date_utils;
+mod encrypt;
 mod view_dates;
 mod view_month;
 use crate::argparse::argparse;
@@ -20,6 +21,8 @@ use crate::view_dates::{get_next_n, grep_by_date, grep_by_description, last_adde
 use crate::view_month::{appointment_check, month_len, month_view};
 
 const DATE_FILE_PATH: &str = "./src/dates/date.file";
+const PASSWORD: &str = "mysecretpassword";
+const SALT_LOC: &str = "./src/dates/.salt";
 
 fn main() -> io::Result<()> {
     let now = Local::now().date_naive();
