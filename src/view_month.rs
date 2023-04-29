@@ -1,6 +1,5 @@
 use crate::date_utils::SavedDate;
 use chrono::NaiveDate;
-use std::collections::HashMap;
 
 pub fn month_len(year: &i32, month: &u32) -> u32 {
     // get number of days of the month

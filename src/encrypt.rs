@@ -1,9 +1,10 @@
-use orion::{aead, kdf};
+use orion::kdf;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 
 pub fn get_pwd_file(file_path: &str) -> String {
+    // get password from file
     let pwd: String = fs::read_to_string(file_path)
         .expect("Couldn't read pwd file")
         .trim()
@@ -12,6 +13,7 @@ pub fn get_pwd_file(file_path: &str) -> String {
 }
 
 pub fn gen_key_pwd(
+    // generate salt and password from password string
     my_pwd: &str,
     salt: orion::kdf::Salt,
 ) -> (orion::kdf::Salt, orion::aead::SecretKey) {
@@ -23,6 +25,7 @@ pub fn gen_key_pwd(
 }
 
 pub fn write_bin(text: &Vec<u8>, file_path: &str) {
+    // write encrypted text to file
     let mut old_path: String = file_path.to_owned();
     old_path.push_str("_old");
     match fs::copy(&file_path, &old_path) {
@@ -38,6 +41,7 @@ pub fn write_bin(text: &Vec<u8>, file_path: &str) {
         .expect("Couldn't write content to binary file");
 }
 pub fn read_bin(file_path: &str) -> Vec<u8> {
+    // read binary file
     let mut file = File::open(file_path).expect("Couldn't open binary file");
     let mut buffer = Vec::<u8>::new();
     file.read_to_end(&mut buffer)

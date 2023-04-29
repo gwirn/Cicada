@@ -1,16 +1,10 @@
-use crate::date_utils::{
-    append_file, argsort, check_dates, offset_and_time, read_file, remove_entry, saved_data_header,
-    time_date_lef, SavedDate,
-};
+use crate::date_utils::{append_file, check_dates, remove_entry, SavedDate};
 use crate::view_dates::{get_next_n, grep_by_date, grep_by_description, last_added};
 use crate::view_month::{appointment_check, month_len, month_view};
 use crate::DATE_FILE_PATH;
 use chrono::Datelike;
-use chrono::{Local, NaiveDate};
+use chrono::NaiveDate;
 use regex::Regex;
-use std::fs;
-use std::io;
-use std::io::prelude::*;
 
 pub fn arg_print(arg_short: &str, arg_long: &str, dtype: &str, msg: &str) {
     println!("{} | {}   <{}>\n     {}\n", arg_short, arg_long, dtype, msg)

@@ -2,10 +2,8 @@ use crate::encrypt::{gen_key_pwd, get_pwd_file, read_bin, write_bin};
 use crate::{PWD_LOC, SALT_LOC};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use notify_rust::Notification;
-use orion::{aead, kdf};
+use orion::aead;
 use std::fmt;
-use std::fs;
-use std::io::prelude::*;
 use std::path::Path;
 
 #[derive(Debug)]
@@ -155,9 +153,10 @@ pub fn read_file(filepath: &str) -> Vec<SavedDate> {
 }
 
 pub fn remove_entry(rm_id: &str, file_path: &str) {
+    // remove entry by id
     let file_content = read_file(file_path);
     let mut removed = Vec::new();
-    for (ci, i) in file_content.iter().enumerate() {
+    for i in file_content.iter() {
         if i.id.to_string() != rm_id {
             let acc_line = format!(
                 "{},{},{},{},{}-X-",
