@@ -1,5 +1,5 @@
-use crate::encrypt::{gen_key_pwd, read_bin, write_bin};
-use crate::{PASSWORD, SALT_LOC};
+use crate::encrypt::{gen_key_pwd, get_pwd_file, read_bin, write_bin};
+use crate::{PWD_LOC, SALT_LOC};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use notify_rust::Notification;
 use orion::{aead, kdf};
@@ -91,7 +91,7 @@ pub fn append_file(filepath: &str, line: &str) {
         dec_d
     } else {
         let (_, key) = gen_key_pwd(
-            &PASSWORD,
+            &get_pwd_file(&PWD_LOC),
             orion::kdf::Salt::from_slice(read_bin(&SALT_LOC).as_ref())
                 .expect("Couldn't retrieve salt from file"),
         );
@@ -106,7 +106,7 @@ pub fn append_file(filepath: &str, line: &str) {
     for i in file_line.as_bytes() {
         dec_data.push(*i);
     }
-    let (salt, key) = gen_key_pwd(&PASSWORD, orion::kdf::Salt::default());
+    let (salt, key) = gen_key_pwd(&get_pwd_file(&PWD_LOC), orion::kdf::Salt::default());
     write_bin(&salt.as_ref().to_vec(), &SALT_LOC);
     let cipher_text = aead::seal(&key, &dec_data).expect("Couldn't encrypt the data");
     write_bin(&cipher_text, &filepath);
@@ -123,7 +123,7 @@ pub fn read_file(filepath: &str) -> Vec<SavedDate> {
             .expect("Couldn't check salt file for existance")
     {
         let (_, key) = gen_key_pwd(
-            &PASSWORD,
+            &get_pwd_file(&PWD_LOC),
             orion::kdf::Salt::from_slice(read_bin(&SALT_LOC).as_ref())
                 .expect("Couldn't retrieve salt from file"),
         );
@@ -168,7 +168,7 @@ pub fn remove_entry(rm_id: &str, file_path: &str) {
             }
         }
     }
-    let (salt, key) = gen_key_pwd(&PASSWORD, orion::kdf::Salt::default());
+    let (salt, key) = gen_key_pwd(&get_pwd_file(&PWD_LOC), orion::kdf::Salt::default());
     write_bin(&salt.as_ref().to_vec(), &SALT_LOC);
     let cipher_text = aead::seal(&key, &removed).expect("Couldn't encrypt the data");
     write_bin(&cipher_text, &file_path);

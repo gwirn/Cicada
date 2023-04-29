@@ -2,6 +2,15 @@ use orion::{aead, kdf};
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
+
+pub fn get_pwd_file(file_path: &str) -> String {
+    let pwd: String = fs::read_to_string(file_path)
+        .expect("Couldn't read pwd file")
+        .trim()
+        .to_string();
+    pwd
+}
+
 pub fn gen_key_pwd(
     my_pwd: &str,
     salt: orion::kdf::Salt,
