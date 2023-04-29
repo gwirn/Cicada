@@ -1,13 +1,22 @@
 # Cicada  🦗
 ***C***ommand l***I***ne ***CA***len***DA***r
 
-Simple command line calendar 
+Simple command line calendar with encrypted storage file
 
 ## Installation
 [Install rust and cargo](https://www.rust-lang.org/tools/install)
-Change the [directory path](https://github.com/gwirn/Cicada/blob/f799b56a5ea189c84c86e71a3e53ca4b7ab51e0b/src/main.rs#L20) to an absolute path so calender can be run from everywhere.
+
+Change the directory path to an absolute path so calender can be run from everywhere for these 3 files:
+* The date storage file
+https://github.com/gwirn/Cicada/blob/f1811ff85513f3fa2fdfc6f9d35b60199185e90f/src/main.rs#L13
+* The file containing the password used for de-/encrypting the date storage file
+https://github.com/gwirn/Cicada/blob/f1811ff85513f3fa2fdfc6f9d35b60199185e90f/src/main.rs#L15
+* The file containing the salt for the password
+https://github.com/gwirn/Cicada/blob/f1811ff85513f3fa2fdfc6f9d35b60199185e90f/src/main.rs#L14
 
 Run `cargo build --release` to create a binary of the program.
+
+If you want a faster version go back to this ab2af0cb14e9f06685caa38b1500de6ce6059b2f commit. The file ecryption makes it slower.
 
 ## Options and functionality
 The default mode of the calendar is just the current month.
