@@ -2,6 +2,13 @@
 name = "cicada"
 version = "0.1.0"
 edition = "2021"
+authors = ["gwirn"]
+license = "MIT"
+description = "A simple command line calendar"
+readme = "README.md"
+repository = "https://github.com/gwirn/Cicada"
+keywords = ["cli", "calendar"]
+categories = ["command-line-program"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

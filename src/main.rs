@@ -10,8 +10,11 @@ mod view_month;
 use crate::argparse::argparse;
 use crate::date_utils::read_file;
 
+// path where the file storing all dates is located
 const DATE_FILE_PATH: &str = "./src/dates/date.file";
+// path where the salt file for key generation should be stored
 const SALT_LOC: &str = "./src/dates/.salt";
+// path where the password should be stored
 const PWD_LOC: &str = "./src/dates/.pwd";
 
 fn main() -> io::Result<()> {

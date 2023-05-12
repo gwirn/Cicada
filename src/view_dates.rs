@@ -1,5 +1,11 @@
 use crate::date_utils::{argsort, saved_data_header, time_date_lef, SavedDate};
 use regex::Regex;
+/// Get the last n added dates
+///
+/// # Arguments
+///
+/// * `n` - how many of the last added dates should be shown
+/// * `date_vect` - all dates
 pub fn last_added(n: usize, data_vect: &Vec<SavedDate>) {
     // get the last added dates
     let id_dates: Vec<i64> = data_vect.iter().map(|x| x.id).collect::<Vec<i64>>();
@@ -15,12 +21,20 @@ pub fn last_added(n: usize, data_vect: &Vec<SavedDate>) {
     }
 }
 
+/// Get the next n dates or the n dates that were already over
+///
+/// # Arguments
+///
+/// * `n` - how many dates should be shown
+/// * `date_vect` - all dates
+/// * `direction` - forward for upcoming dates and reverse for passed dates
 pub fn get_next_n(n: usize, data_vect: &Vec<SavedDate>, direction: &str) {
-    // get the next n dates or the n dates that were already over
+    // get when date are
     let due_dates: Vec<i64> = data_vect
         .iter()
         .map(|x| time_date_lef(&x.due))
         .collect::<Vec<i64>>();
+    // order all the dates chronologically
     let mut date_order = argsort(&due_dates);
 
     saved_data_header();
@@ -49,8 +63,13 @@ pub fn get_next_n(n: usize, data_vect: &Vec<SavedDate>, direction: &str) {
     }
 }
 
+/// Search for dates containing specific time format - e.g. with 17- all dates with 17th or -05- all dates in May
+///
+/// # Arguments
+///
+/// * `search_date` - the pattern that should be looked for
+/// * `data_vect` - vector containing all dates
 pub fn grep_by_date(search_date: &str, data_vect: &Vec<SavedDate>) {
-    // search for date with 17- all dates with 17th or -05- all dates in May
     saved_data_header();
     for i in data_vect {
         if i.due.contains(&search_date) {
@@ -59,8 +78,13 @@ pub fn grep_by_date(search_date: &str, data_vect: &Vec<SavedDate>) {
     }
 }
 
+/// Search with regex pattern in description and print if match was found
+///
+/// # Arguments
+///
+/// * `search_pattern` - regex search pattern to be searched in the date description
+/// * `data_vect` - vector containing all dates
 pub fn grep_by_description(search_pattern: &str, data_vect: &Vec<SavedDate>) {
-    // search with regex pattern in description and print if match was found
     let search_pattern = format!(r"{}", search_pattern);
     let re = Regex::new(&search_pattern).expect("Invalid regex pattern");
     saved_data_header();

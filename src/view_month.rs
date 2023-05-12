@@ -1,8 +1,13 @@
 use crate::date_utils::SavedDate;
 use chrono::NaiveDate;
 
+/// Get number of days of the month
+///
+/// # Arguments
+///
+/// * `year` - the year of the month of interest
+/// * `month` - the month of interest (no leading 0)
 pub fn month_len(year: &i32, month: &u32) -> u32 {
-    // get number of days of the month
     {
         if *month == 12 {
             NaiveDate::from_ymd_opt(year + 1, 1, 1)
@@ -19,6 +24,11 @@ pub fn month_len(year: &i32, month: &u32) -> u32 {
     }
 }
 
+/// Get the name of the month by its number
+///
+/// # Arguments
+///
+/// * `month` - the month as uint
 fn month_name(month: &u32) -> String {
     match month {
         1 => "January".to_string(),
@@ -37,6 +47,16 @@ fn month_name(month: &u32) -> String {
     }
 }
 
+/// View a month in a nice form and indicators for scheduled dates
+///
+/// # Arguments
+///
+/// * `year` - the year of the month of interest
+/// * `month` - the month of interest
+/// * `month_len` - the length of the month
+/// * `cur_day` - the current day
+/// * `event` - dates where a date is scheduled
+/// * `fdm` - number of days between Monday and the first day of the month
 pub fn month_view(
     year: &i32,
     month: &u32,
@@ -47,6 +67,7 @@ pub fn month_view(
 ) {
     println!("{:>15} {}", month_name(&month), &year);
     println!("\x1b[4;1m Mo  Tu  We  Th  Fr  Sa  Su\x1b[0m");
+    // get number of empty fields to print when 1st is not a Monday
     let skip: u32 = *fdm - 1;
     let month_len = month_len + 1;
 
@@ -77,6 +98,13 @@ pub fn month_view(
     println!("");
 }
 
+/// Check for a given month in a year what dates are in this month
+///
+/// # Arguments
+///
+/// * `data_vect` - vector containing all dates
+/// * `month` - the moth of interest (no leading 0)
+/// * `year` - the year of the month of interest
 pub fn appointment_check(data_vect: &Vec<SavedDate>, month: &u32, year: &i32) -> Vec<u32> {
     let mut appointments: Vec<u32> = Vec::new();
     for i in data_vect {

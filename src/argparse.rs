@@ -5,11 +5,26 @@ use crate::DATE_FILE_PATH;
 use chrono::Datelike;
 use chrono::NaiveDate;
 use regex::Regex;
-
+/// print different argument in the same format
+///
+/// # Arguments
+///
+/// * `arg_short` - the short form of the argument
+/// * `arg_long` - the long form of the argument
+/// * `dtype` -  the type of data the argument will be transformed in
+/// * `msg` - a help message to understand the usage of the argument
 pub fn arg_print(arg_short: &str, arg_long: &str, dtype: &str, msg: &str) {
     println!("{} | {}   <{}>\n     {}\n", arg_short, arg_long, dtype, msg)
 }
 
+/// retrieve the supplied arguments and execute the respective commands
+///
+/// # Arguments
+///
+/// * `file_content` - the decrypted content of the date.file
+/// * `cur_day` - the current day date as u32
+/// * `cur_month` - the current month as u32
+/// * `cur_year` - the current year as i32
 pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_year: i32) {
     let args: Vec<String> = std::env::args().collect();
     match args.len() {
@@ -31,13 +46,14 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
         }
         2 => {
             match &args[1][..] {
+                // check if an appointment is upcoming
                 "check" => {
                     check_dates(&file_content);
-                    println!("Checked for upcomming dates")
+                    println!("Checked for upcoming dates")
                 }
                 "-h" | "--help" => {
                     arg_print("-h", "--help", "None", "Print help message and exit");
-                    arg_print("  ", "check", "None", "Check for upcomming appointments and show notification if some are upcomming");
+                    arg_print("  ", "check", "None", "Check for upcoming appointments and show notification if some are upcoming");
                     arg_print("-n", "--next", "usize", "Print next n appointments");
                     arg_print("-p", "--prev", "usize", "Print previous n appointments");
                     arg_print("-gda", "--grepdate", "String", "Search for all dates with a specific pattern\n     e.g. '17-' for all appointments on 17th");
@@ -74,6 +90,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
             let cmd = &args[1];
             let argument = &args[2];
             match &cmd[..] {
+                // the next n upcoming appointments
                 "-n" | "--next" => {
                     get_next_n(
                         argument
@@ -83,6 +100,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                         "forward",
                     );
                 }
+                // the previous n appointments
                 "-p" | "--prev" => {
                     get_next_n(
                         argument
@@ -92,12 +110,15 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                         "reverse",
                     );
                 }
+                // dates matching time
                 "-gda" | "--grepdate" => {
                     grep_by_date(argument, &file_content);
                 }
+                // dates matching description
                 "-gde" | "--grepdes" => {
                     grep_by_description(argument, &file_content);
                 }
+                // the last n added appointments
                 "-l" | "--last_add" => {
                     last_added(
                         argument
@@ -106,9 +127,11 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                         &file_content,
                     );
                 }
+                // delete an appointment by id
                 "-d" | "--delete" => {
                     remove_entry(argument, &DATE_FILE_PATH);
                 }
+                // add an appointment
                 "-a" | "--add_date" => {
                     let re = Regex::new(
                         r"[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{2}:[0-9]{2},[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+),[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+),",
@@ -126,6 +149,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
         }
         4 => {
             let cmd = &args[1];
+            // print month calendar of specific month
             match &cmd[..] {
                 "-m" | "--month" => {
                     let argument1 = &args[2]
