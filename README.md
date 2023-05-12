@@ -2,6 +2,7 @@
 ***C***ommand l***I***ne ***CA***len***DA***r
 
 Simple command line calendar with encrypted storage file
+
 Shows appointments and can alert when appointments are due.
 ```
             May 2023
