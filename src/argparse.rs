@@ -56,7 +56,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                     arg_print("  ", "check", "None", "Check for upcoming appointments and show notification if some are upcoming");
                     arg_print("-n", "--next", "usize", "Print next n appointments");
                     arg_print("-p", "--prev", "usize", "Print previous n appointments");
-                    arg_print("-gda", "--grepdate", "String", "Search for all dates with a specific pattern\n     e.g. '17-' for all appointments on 17th");
+                    arg_print("-gda", "--grepdate", "String", "Search for all dates with a specific pattern\n     e.g. '4-' for all appointments on 4th");
                     arg_print(
                         "-gde",
                         "--grepdes",
@@ -75,12 +75,12 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                         "String",
                         "Provide an id of the appointment that should be removed",
                     );
-                    arg_print("-a", "--add", "String", "Add new appointment in the form '02-02-2022-02:00,2.0,1.5,description of appointment'");
+                    arg_print("-a", "--add", "String", "Add new appointment in the form '04-05-2022-02:00,2.0,1.5,description of appointment'\n     This specifies the date-the time, the duration in hours, \n     the number of hours before the event to show an alert and a description\n     The single quotes around the string are needed \n     The date format is %d-%m-%Y-%H:%M");
                     arg_print(
                         "-m",
                         "--month",
                         "u32, i32",
-                        "Show calendar of specified month in given year like 02 2022",
+                        "Show calendar of specified month in given year like 5 2022",
                     )
                 }
                 _ => eprintln!("Invalid command '{}'", &args[1]),
