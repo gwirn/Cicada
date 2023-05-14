@@ -39,7 +39,7 @@ A red ∆ on the right side of the day indicates an appointment.
      Print help message and exit
 
    | check   <None>
-     Check for upcomming appointments and show notification if some are upcomming
+     Check for upcoming appointments and show notification if some are upcoming
 
 -n | --next   <usize>
      Print next n appointments
@@ -49,7 +49,7 @@ A red ∆ on the right side of the day indicates an appointment.
 
 -gda | --grepdate   <String>
      Search for all dates with a specific pattern
-     e.g. '17-' for all appointments on 17th
+     e.g. '4-' for all appointments on 4th
 
 -gde | --grepdes   <String>
      Regex pattern to search in date description
@@ -61,10 +61,14 @@ A red ∆ on the right side of the day indicates an appointment.
      Provide an id of the appointment that should be removed
 
 -a | --add   <String>
-     Add new appointment in the form '02-02-2022-02:00,2.0,1.5,description of appointment'
+     Add new appointment in the form '04-05-2022-02:00,2.0,1.5,description of appointment'
+     This specifies the date-the time, the duration in hours, 
+     the number of hours before the event to show an alert and a description
+     The single quotes around the string are needed 
+     The date format is %d-%m-%Y-%H:%M
 
 -m | --month   <u32, i32>
-     Show calendar of specified month in given year like 02 2022
+     Show calendar of specified month in given year like 5 2022
 ```
 
 To check your calendar continously you can set a job in [crontab](https://www.man7.org/linux/man-pages/man1/crontab.1.html) that runs `calendar check` every n minutes to get alerts for upcoming events.
