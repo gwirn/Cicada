@@ -23,7 +23,8 @@ https://github.com/gwirn/Cicada/blob/f1811ff85513f3fa2fdfc6f9d35b60199185e90f/sr
 https://github.com/gwirn/Cicada/blob/f1811ff85513f3fa2fdfc6f9d35b60199185e90f/src/main.rs#L15
 * The file containing the salt for the password
 https://github.com/gwirn/Cicada/blob/f1811ff85513f3fa2fdfc6f9d35b60199185e90f/src/main.rs#L14
-
+* The file where the ids of already alerted appointmens are stored
+https://github.com/gwirn/Cicada/blob/aabc47c6ff4b20625030b417e41edaa71ab26ef3/src/main.rs#L20
 Run `cargo build --release` to create a binary of the program.
 
 If you want a faster version go back to this ab2af0cb14e9f06685caa38b1500de6ce6059b2f commit. The file ecryption makes it slower.
