@@ -16,6 +16,8 @@ const DATE_FILE_PATH: &str = "./src/dates/date.file";
 const SALT_LOC: &str = "./src/dates/.salt";
 // path where the password should be stored
 const PWD_LOC: &str = "./src/dates/.pwd";
+// path where already alerted appointment ids are stored
+const ALERT_LOC: &str = "./src/dates/.alerted";
 
 fn main() -> io::Result<()> {
     let now = Local::now().date_naive();

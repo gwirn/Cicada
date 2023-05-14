@@ -1,9 +1,12 @@
 use crate::encrypt::{gen_key_pwd, get_pwd_file, read_bin, write_bin};
-use crate::{PWD_LOC, SALT_LOC};
+use crate::{ALERT_LOC, PWD_LOC, SALT_LOC};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use notify_rust::Notification;
 use orion::aead;
 use std::fmt;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::Write;
 use std::path::Path;
 
 #[derive(Debug)]
@@ -55,27 +58,72 @@ pub fn time_date_lef(in_line: &str) -> i64 {
     time_passed
 }
 
+/// Read file content into a vector
+/// # Argumnets
+///
+/// * `file_path` - path to the file to be read
+fn read_plain_file(file_path: &str) -> Vec<String> {
+    let mut content = Vec::<String>::new();
+    if std::path::Path::new(file_path)
+        .try_exists()
+        .expect("Couldn't check file for existance")
+    {
+        let file = File::open(file_path).expect("Couldn't read file");
+        let buffer = std::io::BufReader::new(file).lines();
+        for i in buffer {
+            let line = i.expect("Couldn't read line");
+            content.push(line);
+        }
+    }
+    content
+}
+
 /// Check if a date alert has to be shown
 ///
 /// # Arguments
 ///
 /// * `date_vect` - vector containing all dates
 pub fn check_dates(data_vect: &Vec<SavedDate>) {
+    let mut checked = read_plain_file(ALERT_LOC);
+    let mut change_happened = false;
     for i in data_vect {
         // how much time is left until the date and alert if it's <= alert time for this date
         let time_left = time_date_lef(&i.due) as f32;
-        if time_left > 0.0 && time_left <= (i.alert_time_h * (60 as f32)) {
-            let msg_string = format!(
-                "Appointment at: {}\nDuration: {} [h]\n{}",
-                i.due, i.length, i.description
-            );
-            Notification::new()
-                .summary("Calendar")
-                .body(&msg_string)
-                .icon("Calendar")
-                .timeout(0)
-                .show()
-                .expect("Couldn't display notification");
+        // is date already over
+        if time_left > 0.0 {
+            // is date in alert time range and was the alert not already shown
+            if time_left <= (i.alert_time_h * (60 as f32)) && !checked.contains(&i.id.to_string()) {
+                let msg_string = format!(
+                    "Appointment at: {}\nDuration: {} [h]\n{}",
+                    i.due, i.length, i.description
+                );
+                Notification::new()
+                    .summary("Calendar")
+                    .body(&msg_string)
+                    .icon("Calendar")
+                    .timeout(0)
+                    .show()
+                    .expect("Couldn't display notification");
+                checked.push(i.id.to_string());
+                change_happened = true;
+            }
+        } else {
+            // remove id from already shown alert file if the date is already over
+            if let Some(index) = checked.iter().position(|r| r == &i.id.to_string()) {
+                checked.remove(index);
+            }
+        }
+    }
+    // write a new already alerted dates file if changes happened
+    if change_happened {
+        let mut file_to_write = std::fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open(ALERT_LOC)
+            .expect("Couldn't write to file");
+        for i in checked.iter() {
+            writeln!(&mut file_to_write, "{}", i).expect("Couldn't write line to file");
         }
     }
 }
