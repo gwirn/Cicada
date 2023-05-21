@@ -44,7 +44,7 @@ jobs:
       run: ./target/debug/cicada -gda "-$(date +%m)"
     - name: Delete
       shell: bash
-      run: ./target/debug/cicada -d $(./target/debug/cicada -l 5 | sed -n 2p | cut -d '|' -f 2)
+      run: ./target/debug/cicada -d $(./target/debug/cicada -l 5 | sed -n 2p | cut -d '|' -f 2) && ./target/debug/cicada -l 3
     - name: Help
       shell: bash
       run: ./target/debug/cicada -h
