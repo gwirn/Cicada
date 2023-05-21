@@ -23,7 +23,7 @@ jobs:
       run: mkdir ./src/dates && echo "mysecretpassword" > ./src/dates/.pwd
     - name: Add dates
       shell: bash
-      run: ./target/debug/cicada -a "$(date -v +1d +%d-%m-%Y-%H:%M),2.,2.,future task" && ./target/debug/cicada -a "$(date -v -1d +%d-%m-%Y-%H:%M),2.,2.,past task"
+      run: ./target/debug/cicada -a "$(date -d '+3 days' +%d-%m-%Y-%H:%M),2.,2.,future task" && ./target/debug/cicada -a "$(date -d '-3 days' +%d-%m-%Y-%H:%M),2.,2.,past task"
     - name: Next appointments
       shell: bash
       run: ./target/debug/cicada -n 2
