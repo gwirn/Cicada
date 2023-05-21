@@ -173,7 +173,6 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                         &event_dates,
                         &first_day_month,
                     );
-                    println!("Print the calender of the specific month")
                 }
                 _ => eprintln!("Invalid command '{} {} {}'", cmd, &args[2], &args[3]),
             }
