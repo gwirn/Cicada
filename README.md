@@ -4,6 +4,9 @@
 Simple command line calendar with encrypted storage file
 
 Shows appointments and can alert when appointments are due.
+
+![TEST](https://github.com/gwirn/Cicada/actions/workflows/rust.yml/badge.svg)
+
 ```
             May 2023
  Mo  Tu  We  Th  Fr  Sa  Su
