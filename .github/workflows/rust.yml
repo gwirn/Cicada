@@ -1,0 +1,50 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: set up files
+      shell: bash
+      run: mkdir ./src/dates && echo "mysecretpassword" > ./src/dates/.pwd
+    - name: Add dates
+      shell: bash
+      run: ./target/debug/cicada -a "$(date -v +1d +%d-%m-%Y-%H:%M),2.,2.,future task" && ./target/debug/cicada -a "$(date -v -1d +%d-%m-%Y-%H:%M),2.,2.,past task"
+    - name: Next appointments
+      shell: bash
+      run: ./target/debug/cicada -n 2
+    - name: Previous appointments
+      shell: bash
+      run: ./target/debug/cicada -p 2
+    - name: Last added
+      shell: bash
+      run: ./target/debug/cicada -l 3
+    - name: Month view
+      shell: bash
+      run: ./target/debug/cicada -m 5 2022
+    - name: Grep by description
+      shell: bash
+      run: ./target/debug/cicada -gde task
+    - name: Grep by date
+      shell: bash
+      run: ./target/debug/cicada -gda "-$(date +%m)"
+    - name: Delete
+      shell: bash
+      run: ./target/debug/cicada -d $(./target/debug/cicada -l 5 | sed -n 2p | cut -d '|' -f 2)
+    - name: Help
+      shell: bash
+      run: ./target/debug/cicada -h
