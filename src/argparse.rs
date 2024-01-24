@@ -29,7 +29,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
     let args: Vec<String> = std::env::args().collect();
     match args.len() {
         1 => {
-            let first_day_month = NaiveDate::from_ymd_opt(cur_year, cur_month as u32, 1)
+            let first_day_month = NaiveDate::from_ymd_opt(cur_year, cur_month, 1)
                 .expect("First day of the month couldn't be calculated")
                 .weekday()
                 .number_from_monday();
@@ -129,7 +129,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                 }
                 // delete an appointment by id
                 "-d" | "--delete" => {
-                    remove_entry(argument, &DATE_FILE_PATH);
+                    remove_entry(argument, DATE_FILE_PATH);
                 }
                 // add an appointment
                 "-a" | "--add_date" => {
@@ -138,7 +138,7 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                     )
                     .expect("Invalid regex pattern");
                     if re.is_match(argument) {
-                        append_file(&DATE_FILE_PATH, argument);
+                        append_file(DATE_FILE_PATH, argument);
                     } else {
                         eprintln!("Invalid argument '{}' has to have the following pattern '02-02-2022-02:00,2.0,1.5,description of appointment'", argument);
                     }
@@ -163,11 +163,11 @@ pub fn argparse(file_content: Vec<SavedDate>, cur_day: u32, cur_month: u32, cur_
                         .weekday()
                         .number_from_monday();
                     let event_dates: Vec<u32> =
-                        appointment_check(&file_content, &*argument1, &*argument2);
-                    let month_hash = month_len(&*argument2, &*argument1);
+                        appointment_check(&file_content, argument1, argument2);
+                    let month_hash = month_len(argument2, argument1);
                     month_view(
-                        &argument2,
-                        &argument1,
+                        argument2,
+                        argument1,
                         &month_hash,
                         &0,
                         &event_dates,

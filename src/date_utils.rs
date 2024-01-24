@@ -50,12 +50,12 @@ pub fn time_date_lef(in_line: &str) -> i64 {
     // the time offset
     let (local_off_minutes, cur_time) = offset_and_time();
     // convert in_line to date
-    let time_test = NaiveDateTime::parse_from_str(&in_line, "%d-%m-%Y-%H:%M")
+    let time_test = NaiveDateTime::parse_from_str(in_line, "%d-%m-%Y-%H:%M")
         .expect("Couldn't parse date from date.file");
     let time_fmt: DateTime<Local> = DateTime::<Utc>::from_utc(time_test, Utc).into();
     // calc the time difference
-    let time_passed = time_fmt.signed_duration_since(cur_time).num_minutes() - &local_off_minutes;
-    time_passed
+    
+    time_fmt.signed_duration_since(cur_time).num_minutes() - &local_off_minutes
 }
 
 /// Read file content into a vector
@@ -92,7 +92,7 @@ pub fn check_dates(data_vect: &Vec<SavedDate>) {
         // is date already over
         if time_left > 0.0 {
             // is date in alert time range and was the alert not already shown
-            if time_left <= (i.alert_time_h * (60 as f32)) && !checked.contains(&i.id.to_string()) {
+            if time_left <= (i.alert_time_h * 60_f32) && !checked.contains(&i.id.to_string()) {
                 let msg_string = format!(
                     "Appointment at: {}\nDuration: {} [h]\n{}",
                     i.due, i.length, i.description
@@ -167,13 +167,13 @@ pub fn append_file(filepath: &str, line: &str) {
     } else {
         // get salt and key for decryption
         let (_, key) = gen_key_pwd(
-            &get_pwd_file(&PWD_LOC),
-            orion::kdf::Salt::from_slice(read_bin(&SALT_LOC).as_ref())
+            &get_pwd_file(PWD_LOC),
+            orion::kdf::Salt::from_slice(read_bin(SALT_LOC).as_ref())
                 .expect("Couldn't retrieve salt from file"),
         );
         // decrypt file content
-        let dec_d = aead::open(&key, &read_bin(&filepath)).expect("Couldn't decipher the file");
-        dec_d
+        
+        aead::open(&key, &read_bin(filepath)).expect("Couldn't decipher the file")
     };
     // time stamp of creation == id
     let entry_ts: i64 = Local::now().timestamp() - 1681429910;
@@ -185,10 +185,10 @@ pub fn append_file(filepath: &str, line: &str) {
         dec_data.push(*i);
     }
     // write everything encrypted to the file
-    let (salt, key) = gen_key_pwd(&get_pwd_file(&PWD_LOC), orion::kdf::Salt::default());
-    write_bin(&salt.as_ref().to_vec(), &SALT_LOC);
+    let (salt, key) = gen_key_pwd(&get_pwd_file(PWD_LOC), orion::kdf::Salt::default());
+    write_bin(&salt.as_ref().to_vec(), SALT_LOC);
     let cipher_text = aead::seal(&key, &dec_data).expect("Couldn't encrypt the data");
-    write_bin(&cipher_text, &filepath);
+    write_bin(&cipher_text, filepath);
 }
 
 /// Read date.file content into vector of type SavedDate
@@ -209,12 +209,12 @@ pub fn read_file(filepath: &str) -> Vec<SavedDate> {
     {
         // get salt and key for decryption
         let (_, key) = gen_key_pwd(
-            &get_pwd_file(&PWD_LOC),
-            orion::kdf::Salt::from_slice(read_bin(&SALT_LOC).as_ref())
+            &get_pwd_file(PWD_LOC),
+            orion::kdf::Salt::from_slice(read_bin(SALT_LOC).as_ref())
                 .expect("Couldn't retrieve salt from file"),
         );
         // decrypt file content
-        let dec_data = aead::open(&key, &read_bin(&filepath)).expect("Couldn't decipher the file");
+        let dec_data = aead::open(&key, &read_bin(filepath)).expect("Couldn't decipher the file");
         // split file content into separate dates and add them to the date_vec in the right format
         for line in std::str::from_utf8(&dec_data)
             .expect("Failed to convert decoded file to str")
@@ -222,7 +222,7 @@ pub fn read_file(filepath: &str) -> Vec<SavedDate> {
             .collect::<Vec<_>>()
         {
             if &line.len() > &0 {
-                let words_split: Vec<&str> = line.split(",").collect();
+                let words_split: Vec<&str> = line.split(',').collect();
                 date_vec.push(SavedDate {
                     id: words_split[0]
                         .parse::<i64>()
@@ -265,8 +265,8 @@ pub fn remove_entry(rm_id: &str, file_path: &str) {
         }
     }
     // encrypt data and write to file
-    let (salt, key) = gen_key_pwd(&get_pwd_file(&PWD_LOC), orion::kdf::Salt::default());
-    write_bin(&salt.as_ref().to_vec(), &SALT_LOC);
+    let (salt, key) = gen_key_pwd(&get_pwd_file(PWD_LOC), orion::kdf::Salt::default());
+    write_bin(&salt.as_ref().to_vec(), SALT_LOC);
     let cipher_text = aead::seal(&key, &removed).expect("Couldn't encrypt the data");
-    write_bin(&cipher_text, &file_path);
+    write_bin(&cipher_text, file_path);
 }

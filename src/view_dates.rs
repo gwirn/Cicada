@@ -72,7 +72,7 @@ pub fn get_next_n(n: usize, data_vect: &Vec<SavedDate>, direction: &str) {
 pub fn grep_by_date(search_date: &str, data_vect: &Vec<SavedDate>) {
     saved_data_header();
     for i in data_vect {
-        if i.due.contains(&search_date) {
+        if i.due.contains(search_date) {
             println!("{}", i);
         }
     }
@@ -85,7 +85,7 @@ pub fn grep_by_date(search_date: &str, data_vect: &Vec<SavedDate>) {
 /// * `search_pattern` - regex search pattern to be searched in the date description
 /// * `data_vect` - vector containing all dates
 pub fn grep_by_description(search_pattern: &str, data_vect: &Vec<SavedDate>) {
-    let search_pattern = format!(r"{}", search_pattern);
+    let search_pattern = search_pattern.to_string();
     let re = Regex::new(&search_pattern).expect("Invalid regex pattern");
     saved_data_header();
     for i in data_vect {

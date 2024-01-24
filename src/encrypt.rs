@@ -46,7 +46,7 @@ pub fn write_bin(text: &Vec<u8>, file_path: &str) {
     // copy file to file_path_old to have a backup
     let mut old_path: String = file_path.to_owned();
     old_path.push_str("_old");
-    match fs::copy(&file_path, &old_path) {
+    match fs::copy(file_path, &old_path) {
         Ok(_) => {
             println!("Copied {} to {}_old file", &file_path, &file_path)
         }
@@ -56,7 +56,7 @@ pub fn write_bin(text: &Vec<u8>, file_path: &str) {
     }
     // create a new file and write to it
     let mut file = std::fs::File::create(file_path).expect("Couldn't create file");
-    file.write_all(&text)
+    file.write_all(text)
         .expect("Couldn't write content to binary file");
 }
 

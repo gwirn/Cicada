@@ -28,12 +28,12 @@ fn main() -> io::Result<()> {
     match fs::OpenOptions::new()
         .write(true)
         .create_new(true)
-        .open(&DATE_FILE_PATH)
+        .open(DATE_FILE_PATH)
     {
         Ok(_) => println!("Created date.file at '{}'", &DATE_FILE_PATH),
         Err(_) => {}
     }
-    let file_content = read_file(&DATE_FILE_PATH);
+    let file_content = read_file(DATE_FILE_PATH);
     argparse(file_content, cur_day, cur_month, cur_year);
     Ok(())
 }

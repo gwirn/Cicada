@@ -65,7 +65,7 @@ pub fn month_view(
     event: &Vec<u32>,
     fdm: &u32,
 ) {
-    println!("{:>15} {}", month_name(&month), &year);
+    println!("{:>15} {}", month_name(month), &year);
     println!("\x1b[4;1m Mo  Tu  We  Th  Fr  Sa  Su\x1b[0m");
     // get number of empty fields to print when 1st is not a Monday
     let skip: u32 = *fdm - 1;
@@ -95,7 +95,7 @@ pub fn month_view(
             print!("    ");
         }
     }
-    println!("");
+    println!();
 }
 
 /// Check for a given month in a year what dates are in this month
@@ -108,7 +108,7 @@ pub fn month_view(
 pub fn appointment_check(data_vect: &Vec<SavedDate>, month: &u32, year: &i32) -> Vec<u32> {
     let mut appointments: Vec<u32> = Vec::new();
     for i in data_vect {
-        let i_split = i.due.split("-").collect::<Vec<&str>>();
+        let i_split = i.due.split('-').collect::<Vec<&str>>();
         if i_split[1]
             .parse::<u32>()
             .expect("Couldn't convert month from date.file to u32")
