@@ -588,11 +588,7 @@ dependencies = [
  "dirs-next",
  "objc-foundation",
  "objc_id",
-<<<<<<< Updated upstream
  "time",
-=======
- "time 0.3.21",
->>>>>>> Stashed changes
 ]
 
 [[package]]
@@ -879,15 +875,9 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "rustix"
-<<<<<<< Updated upstream
 version = "0.37.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4eb579851244c2c03e7c24f501c3432bed80b8f720af1d6e5b0e0f01555a035"
-=======
-version = "0.37.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acf8729d8542766f1b2cf77eb034d52f40d375bb8b615d0b147089946e16613d"
->>>>>>> Stashed changes
 dependencies = [
  "bitflags",
  "errno",
@@ -1080,20 +1070,6 @@ dependencies = [
 name = "time"
 version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-<<<<<<< Updated upstream
-=======
-checksum = "1b797afad3f312d1c66a56d11d0316f916356d11bd158fbc6ca6389ff6bf805a"
-dependencies = [
- "libc",
- "wasi 0.10.0+wasi-snapshot-preview1",
- "winapi",
-]
-
-[[package]]
-name = "time"
-version = "0.3.21"
-source = "registry+https://github.com/rust-lang/crates.io-index"
->>>>>>> Stashed changes
 checksum = "8f3403384eaacbca9923fa06940178ac13e4edb725486d70e8e15881d0c836cc"
 dependencies = [
  "serde",
