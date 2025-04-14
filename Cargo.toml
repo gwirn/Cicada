@@ -16,4 +16,4 @@ categories = ["command-line-program"]
 chrono = "0.4.40"
 regex = "1"
 notify-rust = "4"
-orion = "0.17.9"
+orion = "0.17.10"
